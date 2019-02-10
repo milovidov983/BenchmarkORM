@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Benchmark;
+using Benchmark.Interfaces;
+using EF_1;
+using System;
 
 namespace Launcher
 {
@@ -6,7 +9,9 @@ namespace Launcher
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            IFiller context = new Context();
+            var helper = new Helper(context);
+            helper.FillDb(5000);
         }
     }
 }

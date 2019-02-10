@@ -20,7 +20,8 @@ namespace Benchmark
 
         public void FillDb(int rowCount)
         {
-            if(rowCount < 1)
+            Console.WriteLine($"Trying to fill the database.");
+            if (rowCount < 1)
             {
                 throw new ArgumentException($"The {nameof(rowCount)} parameter must be greater than zero.");
             }
