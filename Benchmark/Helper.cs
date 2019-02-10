@@ -19,7 +19,8 @@ namespace Benchmark
 
         public void FillDb(int rowCount)
         {
-            IEnumerable<Entity> entities = CreateEntities(rowCount);
+            var entities = CreateEntities(rowCount);
+
         }
 
         private IEnumerable<Entity> CreateEntities(int rowCount)
