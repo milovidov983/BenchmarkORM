@@ -26,18 +26,18 @@ namespace Benchmark
             }
 
             var entities = CreateEntities();
-
             var allEntities = entities.Length > rowCount
                 ? entities.Take(rowCount)
                 : Enumerable.Range(1, rowCount).Select(x => entities[x % entities.Length]);
 
-
             _context.FillDb(allEntities);
+            Console.WriteLine($"Database filling was successful.");
         }
 
         private Entity[] CreateEntities()
         {
-            return JsonConvert.DeserializeObject<Entity[]>(File.ReadAllText(@".\DataFiles\entities.json"));
+            return JsonConvert
+                .DeserializeObject<Entity[]>(File.ReadAllText(@".\DataFiles\entities.json"));
         }
     }
 }
