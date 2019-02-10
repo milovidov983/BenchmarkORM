@@ -9,16 +9,16 @@ namespace EF_1
 {
     public class Context : DbContext, IFiller
     {
-        public DbSet<Entity> Users { get; set; }
+        public DbSet<Entity> Entities { get; set; }
 
         public async Task FillDb(IEnumerable<Entity> entities)
         {
-            await this.Users.AddRangeAsync(entities);
+            await this.Entities.AddRangeAsync(entities);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=usersdb;Username=postgres;Password=password");
+            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=usersdb;Username=postgres;Password=postgre");
         }
     }
 }
