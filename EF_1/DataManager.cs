@@ -1,6 +1,8 @@
 ﻿using Benchmark.Interfaces;
+using Benchmark.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,19 +10,27 @@ namespace EF_1
 {
     public class DataManager : IOrm
     {
-        public Task InsertAsync(int _maxRows)
+        private readonly Context _context;
+
+        public DataManager(Context _context)
         {
-            throw new NotImplementedException();
+            _context = _context;
         }
 
-        public Task SelectAsync(int _maxRows)
+        public async Task InsertAsync(Entity[] entities)
         {
-            throw new NotImplementedException();
+            await _context.Entities.AddRangeAsync(entities);
+            await _context.SaveChangesAsync();
         }
 
-        public Task UpdateAsync(int _maxRows)
+        public void Select()
         {
-            throw new NotImplementedException();
+            var result = _context.Entities.Select(x => x).ToArray();
+        }
+
+        public Task UpdateAsync(Entity[] entities)
+        {
+            
         }
     }
 }
