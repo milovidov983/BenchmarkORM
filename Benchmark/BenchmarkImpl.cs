@@ -21,7 +21,7 @@ namespace Benchmark
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            await _context.InsertAsync(_maxRows);
+            await _context.InsertAsync(Helper.CreateEntities(_maxRows));
 
             stopwatch.Stop();
             return stopwatch.Elapsed;
