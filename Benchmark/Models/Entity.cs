@@ -6,6 +6,7 @@ namespace Benchmark.Models
 {
     public class Entity
     {
+        public int Id { get; set; }
         public int IntData { get; set; }
         public double DoubleData { get; set; }
         public string StringData { get; set; }

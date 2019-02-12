@@ -28,9 +28,16 @@ namespace EF_1
             var result = _context.Entities.Select(x => x).ToArray();
         }
 
-        public Task UpdateAsync(Entity[] entities)
+        public async Task UpdateAsync()
         {
-            
+            Parallel.ForEach(_context.Entities, (entity) => {
+                entity.IntData = 1;
+                entity.DoubleData = 0.1;
+                entity.StringData = "Updated";
+            });
+
+            await _context.SaveChangesAsync();
+                
         }
     }
 }

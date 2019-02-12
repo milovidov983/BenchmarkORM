@@ -9,7 +9,7 @@ namespace Benchmark.Interfaces
     public interface IOrm
     {
         Task InsertAsync(Entity[] entities);
-        Task UpdateAsync(Entity[] entities);
+        Task UpdateAsync();
         void Select();
     }
 }
