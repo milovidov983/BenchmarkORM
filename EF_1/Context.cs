@@ -18,7 +18,7 @@ namespace EF_1
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=usersdb;Username=postgres;Password=postgre");
+            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=benchmarkdb;Username=postgres;Password=postgre");
         }
     }
 }
