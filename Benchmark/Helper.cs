@@ -43,8 +43,9 @@ namespace Benchmark
 
         private static Entity[] GetEntities()
         {
+            string path = Directory.GetCurrentDirectory();
             return JsonConvert
-                .DeserializeObject<Entity[]>(File.ReadAllText(@".\DataFiles\entities.json"));
+                .DeserializeObject<Entity[]>(File.ReadAllText($"entities.json"));
         }
     }
 }
