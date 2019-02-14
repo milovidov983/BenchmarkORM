@@ -12,10 +12,12 @@ namespace Benchmark
     public class Helper
     {
         private readonly IFiller _context;
+        private readonly Entity[] _entities;
 
-        public Helper(IFiller _context)
+        public Helper(IFiller context, Entity[] entities)
         {
-            this._context = _context;
+            this._context = context;
+            this._entities = entities;
         }
 
         public void FillDb(int rowCount)
@@ -26,26 +28,10 @@ namespace Benchmark
                 throw new ArgumentException($"The {nameof(rowCount)} parameter must be greater than zero.");
             }
 
-            var entities = CreateEntities(rowCount);
-
-            _context.FillDb(entities);
+            _context.FillDb(_entities);
+            
             Console.WriteLine($"Database filling was successful.");
         }
 
-        public static Entity[] CreateEntities(int rowCount)
-        {
-            var entities = GetEntities();
-            return entities.Length > rowCount
-                ? entities.Take(rowCount).ToArray()
-                : Enumerable.Range(1, rowCount).Select(x => entities[x % entities.Length]).ToArray();
-
-        }
-
-        private static Entity[] GetEntities()
-        {
-            string path = Directory.GetCurrentDirectory();
-            return JsonConvert
-                .DeserializeObject<Entity[]>(File.ReadAllText($"entities.json"));
-        }
     }
 }

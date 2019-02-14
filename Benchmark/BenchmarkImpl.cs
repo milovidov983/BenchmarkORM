@@ -1,4 +1,5 @@
 ﻿using Benchmark.Interfaces;
+using Benchmark.Models;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -16,12 +17,12 @@ namespace Benchmark
             this._maxRows = _maxRows;
         }
 
-        public async Task<TimeSpan> StartInsertBemchmark()
+        public async Task<TimeSpan> StartInsertBemchmark(Entity[] entities)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            await _context.InsertAsync(Helper.CreateEntities(_maxRows));
+            await _context.InsertAsync(entities);
 
             stopwatch.Stop();
             return stopwatch.Elapsed;

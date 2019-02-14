@@ -14,6 +14,7 @@ namespace EF_1
         public async Task FillDb(IEnumerable<Entity> entities)
         {
             await this.Entities.AddRangeAsync(entities);
+            await this.SaveChangesAsync();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

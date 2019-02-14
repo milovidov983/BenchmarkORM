@@ -10,4 +10,10 @@
     <ProjectReference Include="..\EF_1\EF_1.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="entities.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
