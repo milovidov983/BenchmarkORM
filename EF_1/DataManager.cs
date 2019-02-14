@@ -14,7 +14,7 @@ namespace EF_1
 
         public DataManager(Context _context)
         {
-            _context = _context;
+            this._context = _context;
         }
 
         public async Task InsertAsync(Entity[] entities)
@@ -30,14 +30,15 @@ namespace EF_1
 
         public async Task UpdateAsync()
         {
-            Parallel.ForEach(_context.Entities, (entity) => {
+            Parallel.ForEach(_context.Entities, (entity) =>
+            {
                 entity.IntData = 1;
                 entity.DoubleData = 0.1;
                 entity.StringData = "Updated";
             });
 
             await _context.SaveChangesAsync();
-                
+
         }
     }
 }

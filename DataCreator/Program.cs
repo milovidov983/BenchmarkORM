@@ -13,7 +13,7 @@ namespace DataCreator
 
         static void Main(string[] args)
         {
-            var _strData = File.ReadAllLines(@".\DataFiles\data.txt");
+            var _strData = File.ReadAllLines(@"data.txt");
 
             var entities = Enumerable.Range(1, 100).Select(x => new Entity
             {
