@@ -41,15 +41,15 @@ namespace EF2Benchmark {
 
             var sb = new StringBuilder();
 
-            sb.Append($"Insert ms.\t")
-                .Append($"Update ms.\t")
+            sb.Append($"Insert ms.,")
+                .Append($"Update ms.,")
                 .Append($"Select ms.")
                 .Append(Environment.NewLine);
 
             Enumerable.Range(0, result.IterationsCount).Select(x => sb
-                .Append($"{result.InsertMs[x]}\t")
-                .Append($"{result.UpdateMs[x]}\t")
-                .Append($"{result.SelectMs[x]}\t")
+                .Append($"{result.InsertMs[x]},")
+                .Append($"{result.UpdateMs[x]},")
+                .Append($"{result.SelectMs[x]},")
                 .Append(Environment.NewLine)
             ).ToArray();
 
