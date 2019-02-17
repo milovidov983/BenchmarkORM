@@ -71,6 +71,24 @@ namespace EF2Benchmark {
             return times.ToArray();
         }
 
+        private static long[] UpdateTest(Action prepareDb, int iterationCount = 10) {
+            var newAges = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            var sw = new Stopwatch();
+            var times = new List<long>();
+            prepareDb();
+
+            Console.WriteLine($"Start update test ({interationCount})...");
+            for (var i = 0; i < interationCount; i++) {
+                using(var db = new Context()) {
+                    sw.Start();
+                    db.Users.AddRange(users);
+                    db.SaveChanges();
+                    sw.Stop();
+                }
+                times.Add(sw.ElapsedMilliseconds);
+                sw.Reset();
+            }
+        }
         public class User {
             public int Id { get; set; }
             public string Name { get; set; }
