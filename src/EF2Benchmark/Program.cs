@@ -1,11 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace EF2Benchmark {
+    public class Result {
+        public int AmountEntities { get; set; }
+        public long[] InsertMs { get; set; }
+        public long[] UpdateMs { get; set; }
+        public long[] SelectMs { get; set; }
+    }
     class Program {
         private static readonly string connectionString = "Host=localhost;Port=5432;Database=usersdb;Username=postgres;Password=postgre";
 
@@ -15,6 +23,28 @@ namespace EF2Benchmark {
                 Console.WriteLine($"Insert 5000 in {t} ms.");
             }
             Console.WriteLine($"Average {times.Average()} ms.");
+        }
+
+        private static void WriteResults(Result result) {
+            if (result == null) {
+                throw new ArgumentNullException("Param result must be not null.");
+            }
+
+            var sb = new StringBuilder(result.AmountEntities * 10 ?? 10000);
+
+            sb.Append($"Insert {result.AmountEntities} row/ms.\t")
+                .Append($"Update {result.AmountEntities} row/ms.\t")
+                .Append($"Select {result.AmountEntities} row/ms.")
+                .Append(Environment.NewLine);
+
+            Enumerable.Range(0, result.AmountEntities).Select(x => sb
+                .Append($"{result.InsertMs[x]}\t")
+                .Append($"{result.UpdateMs[x]}\t")
+                .Append($"{result.SelectMs[x]}\t")
+                .Append(Environment.NewLine)
+            );
+
+            File.WriteAllText("results.csv", sb.ToString());
         }
 
         private static long[] InsertTest(int interationCount = 10) {
@@ -54,7 +84,7 @@ namespace EF2Benchmark {
         }
 
         private static User[] GetUsers() {
-            var users = System.IO.File.ReadAllText("users.json");
+            var users = File.ReadAllText("users.json");
             return Newtonsoft.Json.JsonConvert.DeserializeObject<User[]>(users);
         }
 
@@ -74,7 +104,7 @@ namespace EF2Benchmark {
         private static void CreateTable(NpgsqlConnection connection) {
             using(var cmd = new NpgsqlCommand()) {
                 cmd.Connection = connection;
-                cmd.CommandText = System.IO.File.ReadAllText("createScript.sql");
+                cmd.CommandText = File.ReadAllText("createScript.sql");
                 cmd.ExecuteNonQuery();
             }
         }
