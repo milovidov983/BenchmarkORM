@@ -26,7 +26,8 @@ namespace EF2Benchmark {
             try {
                 results.InsertMs = InsertTest(dbPreparer.CreateEmptyTable, results.IterationsCount);
                 results.UpdateMs = UpdateTest(dbPreparer.CreateFilledTable, results.IterationsCount);
-                Console.WriteLine(results.UpdateMs.Length);
+                results.SelectMs = SelectTest(dbPreparer.CreateFilledTable, results.IterationsCount);
+
                 WriteResults(results);
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
@@ -40,18 +41,19 @@ namespace EF2Benchmark {
 
             var sb = new StringBuilder();
 
-            sb.Append($"Insert {result.IterationsCount} rows/ms.\t")
-                .Append($"Update {result.IterationsCount} rows/ms.\t")
-                //.Append($"Select {result.AmountEntities} rows/ms.")
+            sb.Append($"Insert ms.\t")
+                .Append($"Update ms.\t")
+                .Append($"Select ms.")
                 .Append(Environment.NewLine);
 
             Enumerable.Range(0, result.IterationsCount).Select(x => sb
                 .Append($"{result.InsertMs[x]}\t")
                 .Append($"{result.UpdateMs[x]}\t")
-                //.Append($"{result.SelectMs[x]}\t")
+                .Append($"{result.SelectMs[x]}\t")
                 .Append(Environment.NewLine)
             ).ToArray();
 
+            Console.WriteLine("Results saved to result.csv");
             File.WriteAllText("results.csv", sb.ToString());
         }
 
@@ -60,7 +62,7 @@ namespace EF2Benchmark {
             var times = new List<long>();
 
             Console.WriteLine($"Start insertion test ({interationCount})...");
-            for (var i = 0; i < interationCount; i++) {
+            for (var iteration = 0; iteration < interationCount; iteration++) {
                 prepareDb();
                 using(var db = new Context(connectionString)) {
                     sw.Start();
@@ -103,5 +105,24 @@ namespace EF2Benchmark {
             return times.ToArray();
         }
 
+        private static long[] SelectTest(Action prepareDb, int iterationCount = 10) {
+            prepareDb();
+            var sw = new Stopwatch();
+            var times = new List<long>();
+
+            Console.WriteLine($"Start select test ({iterationCount})...");
+            for (var iteration = 0; iteration < iterationCount; iteration++) {
+                using(var db = new Context(connectionString)) {
+                    sw.Start();
+                    var users = db.Users.ToArray();
+                    sw.Stop();
+                    times.Add(sw.ElapsedMilliseconds);
+                    sw.Reset();
+                }
+            }
+
+            Console.WriteLine($"Stop select test.");
+            return times.ToArray();
+        }
     }
 }
