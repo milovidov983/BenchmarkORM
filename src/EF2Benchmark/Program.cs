@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 
 namespace EF2Benchmark {
     public class Result {
@@ -18,7 +17,9 @@ namespace EF2Benchmark {
         private static readonly string connectionString = "Host=localhost;Port=5432;Database=usersdb;Username=postgres;Password=postgre";
 
         static void Main(string[] args) {
-            var times = InsertTest();
+            var dbPreparer = new DatabasePreparer(connectionString);
+            var times = InsertTest(dbPreparer.CreateEmptyTable);
+
             foreach (var t in times) {
                 Console.WriteLine($"Insert 5000 in {t} ms.");
             }
@@ -30,7 +31,7 @@ namespace EF2Benchmark {
                 throw new ArgumentNullException("Param result must be not null.");
             }
 
-            var sb = new StringBuilder(result.AmountEntities * 10 ?? 10000);
+            var sb = new StringBuilder(result.AmountEntities * 10);
 
             sb.Append($"Insert {result.AmountEntities} rows/ms.\t")
                 .Append($"Update {result.AmountEntities} rows/ms.\t")
@@ -47,15 +48,15 @@ namespace EF2Benchmark {
             File.WriteAllText("results.csv", sb.ToString());
         }
 
-        private static long[] InsertTest(int interationCount = 10) {
+        private static long[] InsertTest(Action prepareDb, int interationCount = 2) {
             // Preparing data
             var users = GetUsers();
             var sw = new Stopwatch();
             var times = new List<long>();
 
-            Console.WriteLine($"Start {interationCount} insertion tests...");
+            Console.WriteLine($"Start insertion test ({interationCount})...");
             for (var i = 0; i < interationCount; i++) {
-                PrepareDatabase();
+                prepareDb();
                 using(var db = new Context()) {
                     sw.Start();
                     db.Users.AddRange(users);
@@ -88,25 +89,5 @@ namespace EF2Benchmark {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<User[]>(users);
         }
 
-        private static void PrepareDatabase() {
-            using(var connection = new NpgsqlConnection(connectionString)) {
-                try {
-                    connection.Open();
-                    CreateTable(connection);
-                } catch (Exception ex) {
-                    Console.WriteLine(ex.Message);
-                } finally {
-                    connection.Close();
-                }
-            }
-        }
-
-        private static void CreateTable(NpgsqlConnection connection) {
-            using(var cmd = new NpgsqlCommand()) {
-                cmd.Connection = connection;
-                cmd.CommandText = File.ReadAllText("createScript.sql");
-                cmd.ExecuteNonQuery();
-            }
-        }
     }
 }
