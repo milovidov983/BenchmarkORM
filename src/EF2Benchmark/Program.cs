@@ -7,7 +7,7 @@ namespace EF2Benchmark {
         private static readonly string connectionString = "Host=localhost;Port=5432;Database=usersdb;Username=postgres;Password=postgre";
 
         static void Main(string[] args) {
-            Prepare();
+
         }
 
         class User {
@@ -15,13 +15,17 @@ namespace EF2Benchmark {
             public string Name { get; set; }
             public int Age { get; set; }
         }
-
         class Context : DbContext {
             public DbSet<User> Users { get; set; }
 
             protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
                 optionsBuilder.UseNpgsql(connectionString);
             }
+        }
+
+        private User[] GetUsers() {
+            var users = System.IO.File.ReadAllText("users.json");
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<User[]>(users);
         }
 
         private static void Prepare() {
