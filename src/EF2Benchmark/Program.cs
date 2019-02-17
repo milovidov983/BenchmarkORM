@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EF2Benchmark {
     public class Result {
-        public int AmountEntities { get; set; }
+        public int IterationsCount { get; set; }
         public long[] InsertMs { get; set; }
         public long[] UpdateMs { get; set; }
         public long[] SelectMs { get; set; }
@@ -21,12 +21,16 @@ namespace EF2Benchmark {
         static void Main(string[] args) {
             var dbPreparer = new DatabasePreparer(connectionString);
             var results = new Result {
-                AmountEntities = users.Length
+                IterationsCount = 10
             };
-
-            results.InsertMs = InsertTest(dbPreparer.CreateEmptyTable);
-            results.UpdateMs = UpdateTest(dbPreparer.CreateFilledTable);
-            
+            try {
+                results.InsertMs = InsertTest(dbPreparer.CreateEmptyTable, results.IterationsCount);
+                results.UpdateMs = UpdateTest(dbPreparer.CreateFilledTable, results.IterationsCount);
+                Console.WriteLine(results.UpdateMs.Length);
+                WriteResults(results);
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+            }
         }
 
         private static void WriteResults(Result result) {
@@ -34,19 +38,19 @@ namespace EF2Benchmark {
                 throw new ArgumentNullException("Param result must be not null.");
             }
 
-            var sb = new StringBuilder(result.AmountEntities * 10);
+            var sb = new StringBuilder();
 
-            sb.Append($"Insert {result.AmountEntities} rows/ms.\t")
-                .Append($"Update {result.AmountEntities} rows/ms.\t")
-                .Append($"Select {result.AmountEntities} rows/ms.")
+            sb.Append($"Insert {result.IterationsCount} rows/ms.\t")
+                .Append($"Update {result.IterationsCount} rows/ms.\t")
+                //.Append($"Select {result.AmountEntities} rows/ms.")
                 .Append(Environment.NewLine);
 
-            Enumerable.Range(0, result.AmountEntities).Select(x => sb
+            Enumerable.Range(0, result.IterationsCount).Select(x => sb
                 .Append($"{result.InsertMs[x]}\t")
                 .Append($"{result.UpdateMs[x]}\t")
-                .Append($"{result.SelectMs[x]}\t")
+                //.Append($"{result.SelectMs[x]}\t")
                 .Append(Environment.NewLine)
-            );
+            ).ToArray();
 
             File.WriteAllText("results.csv", sb.ToString());
         }
@@ -85,8 +89,7 @@ namespace EF2Benchmark {
             using(var db = new Context(connectionString)) {
 
                 for (var iteration = 0; iteration < iterationCount; iteration++) {
-                    Parallel.ForEach(db.Users, user => 
-                    {
+                    Parallel.ForEach(db.Users, user => {
                         user.Age = closedQueue.Dequeue() + iteration;
                     });
                     sw.Start();
@@ -99,10 +102,6 @@ namespace EF2Benchmark {
             Console.WriteLine($"Stop update test.");
             return times.ToArray();
         }
-
-
-
-
 
     }
 }
