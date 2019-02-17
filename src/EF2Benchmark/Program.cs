@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace EF2Benchmark {
@@ -15,15 +16,17 @@ namespace EF2Benchmark {
     }
     class Program {
         private static readonly string connectionString = "Host=localhost;Port=5432;Database=usersdb;Username=postgres;Password=postgre";
+        private static readonly User[] users = Helpers.GetUsers();
 
         static void Main(string[] args) {
             var dbPreparer = new DatabasePreparer(connectionString);
-            var times = InsertTest(dbPreparer.CreateEmptyTable);
+            var results = new Result {
+                AmountEntities = users.Length
+            };
 
-            foreach (var t in times) {
-                Console.WriteLine($"Insert 5000 in {t} ms.");
-            }
-            Console.WriteLine($"Average {times.Average()} ms.");
+            results.InsertMs = InsertTest(dbPreparer.CreateEmptyTable);
+            results.UpdateMs = UpdateTest(dbPreparer.CreateFilledTable);
+            
         }
 
         private static void WriteResults(Result result) {
@@ -48,16 +51,14 @@ namespace EF2Benchmark {
             File.WriteAllText("results.csv", sb.ToString());
         }
 
-        private static long[] InsertTest(Action prepareDb, int interationCount = 2) {
-            // Preparing data
-            var users = GetUsers();
+        private static long[] InsertTest(Action prepareDb, int interationCount = 10) {
             var sw = new Stopwatch();
             var times = new List<long>();
 
             Console.WriteLine($"Start insertion test ({interationCount})...");
             for (var i = 0; i < interationCount; i++) {
                 prepareDb();
-                using(var db = new Context()) {
+                using(var db = new Context(connectionString)) {
                     sw.Start();
                     db.Users.AddRange(users);
                     db.SaveChanges();
@@ -72,40 +73,36 @@ namespace EF2Benchmark {
         }
 
         private static long[] UpdateTest(Action prepareDb, int iterationCount = 10) {
+            // Preparing data
+            prepareDb();
             var newAges = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            var closedQueue = new Helpers.ClosedQueue<int>(newAges);
+
             var sw = new Stopwatch();
             var times = new List<long>();
-            prepareDb();
 
-            Console.WriteLine($"Start update test ({interationCount})...");
-            for (var i = 0; i < interationCount; i++) {
-                using(var db = new Context()) {
+            Console.WriteLine($"Start update test ({iterationCount})...");
+            using(var db = new Context(connectionString)) {
+
+                for (var iteration = 0; iteration < iterationCount; iteration++) {
+                    Parallel.ForEach(db.Users, user => 
+                    {
+                        user.Age = closedQueue.Dequeue() + iteration;
+                    });
                     sw.Start();
-                    db.Users.AddRange(users);
                     db.SaveChanges();
                     sw.Stop();
+                    times.Add(sw.ElapsedMilliseconds);
+                    sw.Reset();
                 }
-                times.Add(sw.ElapsedMilliseconds);
-                sw.Reset();
             }
-        }
-        public class User {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public int Age { get; set; }
-        }
-        public class Context : DbContext {
-            public DbSet<User> Users { get; set; }
-
-            protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-                optionsBuilder.UseNpgsql(connectionString);
-            }
+            Console.WriteLine($"Stop update test.");
+            return times.ToArray();
         }
 
-        private static User[] GetUsers() {
-            var users = File.ReadAllText("users.json");
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<User[]>(users);
-        }
+
+
+
 
     }
 }

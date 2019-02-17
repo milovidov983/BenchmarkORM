@@ -1,5 +1,6 @@
 namespace EF2Benchmark {
     using System;
+    using System.IO;
 
     public class Helpers {
         public class ClosedQueue<T> {
@@ -8,7 +9,7 @@ namespace EF2Benchmark {
 
             public ClosedQueue(T[] elements) {
                 if (elements == null || elements.Length < 1) {
-                    throw new ArgumentException($"Array parameter {nameof(elements)} must be grather than 0");
+                    throw new ArgumentException($"Array {nameof(elements)} must be grather than 0");
                 }
                 this.elements = elements;
             }
@@ -20,6 +21,12 @@ namespace EF2Benchmark {
                 pointer = 0;
                 return elements[pointer];
             }
+        }
+
+        public static User[] GetUsers()
+        {
+            var users = File.ReadAllText("users.json");
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<User[]>(users);
         }
     }
 }

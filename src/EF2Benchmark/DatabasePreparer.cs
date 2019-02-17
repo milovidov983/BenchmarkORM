@@ -33,5 +33,16 @@ namespace EF2Benchmark {
             };
             PrepareDatabase(actionCreate);
         }
+
+        public void CreateFilledTable() {
+            CreateEmptyTable();
+            var users = Helpers.GetUsers();
+            using (var db = new Context(connectionString))
+            {
+                db.Users.AddRange(users);
+                db.SaveChanges();
+            }
+
+        }
     }
 }
