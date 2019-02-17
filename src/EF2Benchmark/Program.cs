@@ -49,7 +49,7 @@ namespace EF2Benchmark {
             Enumerable.Range(0, result.IterationsCount).Select(x => sb
                 .Append($"{result.InsertMs[x]},")
                 .Append($"{result.UpdateMs[x]},")
-                .Append($"{result.SelectMs[x]},")
+                .Append($"{result.SelectMs[x]}")
                 .Append(Environment.NewLine)
             ).ToArray();
 
