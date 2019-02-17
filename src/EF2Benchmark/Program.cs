@@ -32,9 +32,9 @@ namespace EF2Benchmark {
 
             var sb = new StringBuilder(result.AmountEntities * 10 ?? 10000);
 
-            sb.Append($"Insert {result.AmountEntities} row/ms.\t")
-                .Append($"Update {result.AmountEntities} row/ms.\t")
-                .Append($"Select {result.AmountEntities} row/ms.")
+            sb.Append($"Insert {result.AmountEntities} rows/ms.\t")
+                .Append($"Update {result.AmountEntities} rows/ms.\t")
+                .Append($"Select {result.AmountEntities} rows/ms.")
                 .Append(Environment.NewLine);
 
             Enumerable.Range(0, result.AmountEntities).Select(x => sb
