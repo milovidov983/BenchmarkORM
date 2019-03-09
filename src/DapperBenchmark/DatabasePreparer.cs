@@ -1,6 +1,8 @@
 namespace DapperBenchmark {
+    using System.Data.SqlClient;
     using System.IO;
     using System;
+    using Dapper;
     using Npgsql;
 
     public class DatabasePreparer {
@@ -37,9 +39,11 @@ namespace DapperBenchmark {
         public void CreateFilledTable() {
             CreateEmptyTable();
             var users = Helpers.GetUsers();
-            using(var db = new Context(connectionString)) {
-                db.Users.AddRange(users);
-                db.SaveChanges();
+            var sql = "INSERT INTO Users (Name,Age) VALUES (@Name,@Age) ";
+            using(var db = new SqlConnection(connectionString)) {
+                db.Open();
+                var affectedRows = db.Execute(sql, users);
+                db.Close();
             }
 
         }
